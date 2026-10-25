@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 230" role="img" aria-labelledby="title desc">
+  <title id="title">标记成像传感器测量链路示意图</title>
+  <desc id="desc">照明、标记、成像光路与光阑、探测器、估计算法。</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0v6l7-3z" fill="#637c71"/></marker></defs>
+  <rect width="760" height="230" fill="#f7f6f0"/>
+  <path d="M95 112H663" stroke="#81998a" stroke-width="1.5" stroke-dasharray="4 5" marker-end="url(#arrow)"/>
+  <rect x="34" y="78" width="76" height="68" rx="12" fill="#f4e7dc" stroke="#d3a284"/><circle cx="72" cy="112" r="13" fill="#d6754d" opacity=".8"/>
+  <text x="72" y="166" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#53665a">照明</text>
+  <rect x="174" y="83" width="82" height="58" rx="8" fill="#fdfbf6" stroke="#bdc9bd"/><path d="m188 126 13-30 13 30 13-30 14 30" fill="none" stroke="#ca6845" stroke-width="2"/>
+  <text x="215" y="166" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#53665a">标记 / 目标</text>
+  <path d="M351 54q-30 58 0 116m17-116q30 58 0 116" fill="rgba(105,143,127,.12)" stroke="#6c8c7b" stroke-width="2"/>
+  <rect x="328" y="62" width="63" height="10" rx="3" fill="#5a7769"/><text x="360" y="42" text-anchor="middle" font-family="monospace" font-size="9" fill="#94998f">光阑 / 入瞳</text>
+  <text x="360" y="194" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#53665a">成像光路</text>
+  <rect x="493" y="72" width="14" height="80" rx="3" fill="#dce6e6" stroke="#638493" stroke-width="1.5"/><path d="M500 80v65" stroke="#4d82a4" stroke-dasharray="2 4"/>
+  <text x="500" y="174" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#53665a">探测器</text>
+  <rect x="603" y="80" width="108" height="64" rx="11" fill="#eef0e8" stroke="#bbc8b9"/><path d="m625 121 17-16 12 9 26-28" fill="none" stroke="#c77b54" stroke-width="2"/>
+  <text x="657" y="166" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#53665a">估计算法</text>
+  <text x="380" y="222" text-anchor="middle" font-family="monospace" font-size="8" fill="#94998f">光学像差在成像光路；采样 / 噪声在探测；ROI / 拟合在算法</text>
+</svg>
