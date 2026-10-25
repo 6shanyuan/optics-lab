@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { diagnostics, glossary, quiz, weekRoadmap } from './content'
+import WeekOneLesson from './WeekOneLesson'
 import {
   airyFirstMinimumRadiusUm,
   defocusCircleDiameterUm,
@@ -11,6 +12,7 @@ import {
 } from './physics'
 
 const navItems = [
+  ['课程正文', '#lesson'],
   ['模拟器', '#labs'],
   ['光路图', '#diagrams'],
   ['诊断', '#diagnostics'],
@@ -379,7 +381,7 @@ function App() {
       <header className="topbar">
         <a className="brand" href="#top" aria-label="光学测量学习首页"><span className="brand-mark"><i /><i /><i /></span><span>光学测量学习<small>OPTICAL METROLOGY · WEEK 01</small></span></a>
         <nav aria-label="主导航">{navItems.map(([label, href]) => <a key={href} href={href}>{label}</a>)}</nav>
-        <a className="topbar-cta" href="#notes">打开学习档案 <span>↗</span></a>
+        <a className="topbar-cta" href="#lesson">打开课程正文 <span>↗</span></a>
       </header>
 
       <main id="top">
@@ -388,8 +390,8 @@ function App() {
             <p className="eyebrow"><span className="eyebrow-dot" />第 1 周 · 传感成像光路与像差概念</p>
             <h1>把一个光点，<br /><em>看成一条测量链。</em></h1>
             <p className="hero-lede">从目标、光路到探测器，拆开理想像为什么会变成真实的斑。用参数可调的演示建立直觉，再用公式和对照检查结论。</p>
-            <div className="hero-actions"><a className="button-primary" href="#labs">开始交互学习 <span>↓</span></a><a className="button-quiet" href="#notes">先看本周笔记 <span>↗</span></a></div>
-            <div className="hero-meta"><span><b>12 小时</b> 本周必做时间</span><span><b>03 个</b> 可调仿真</span><span><b>01 / 12</b> 学习进度</span></div>
+            <div className="hero-actions"><a className="button-primary" href="#lesson">开始课程学习 <span>↓</span></a><a className="button-quiet" href="#labs">再做参数仿真 <span>↗</span></a></div>
+            <div className="hero-meta"><span><b>12 小时</b> 本周必做时间</span><span><b>08 节</b> 课程正文</span><span><b>01 / 12</b> 学习进度</span></div>
           </div>
           <div className="hero-art" aria-label="光束通过光阑并在传感器面形成光斑的示意">
             <div className="art-topline"><span>OPTICAL PATH / 01</span><span>SCHEMATIC</span></div>
@@ -422,7 +424,7 @@ function App() {
           <div className="week-progress"><span /></div>
           <div className="week-labels"><span>第 1 周 · 本周已整理</span><span>下一步：第 2 周 波前与衍射点像</span><span>12 周 · 144–180 小时</span></div>
           <div className="roadmap-grid">{weekRoadmap.map((week, index) => <div className={`roadmap-item${index === 0 ? ' active' : ''}`} key={week}><span>W{String(index + 1).padStart(2, '0')}</span><p>{week}</p>{index === 0 && <i>已归档</i>}</div>)}</div>
-          <p className="roadmap-note">路线依据《12 周光刻机光学原理与问题定位基础学习计划》（2026-10-20）。这份交付只整理第 1 周；第 2 周及之后不在本归档内展开。</p>
+          <p className="roadmap-note">路线依据《12 周光刻机光学原理与问题定位基础学习计划》（2026-10-20）。这份交付只整理第 1 周；第 2 周及之后不在本归档内展开。<a href="https://github.com/6shanyuan/optics-lab/blob/main/optical-metrology/roadmap/12%E5%91%A8%E5%85%89%E5%AD%A6%E5%8E%9F%E7%90%86%E4%B8%8E%E9%97%AE%E9%A2%98%E5%AE%9A%E4%BD%8D%E5%AD%A6%E4%B9%A0%E8%AE%A1%E5%88%92.md" target="_blank" rel="noreferrer">查看完整学习计划 ↗</a></p>
         </section>
 
         <section className="learning-frame">
@@ -437,6 +439,8 @@ function App() {
             </div>
           </div>
         </section>
+
+        <WeekOneLesson />
 
         <section className="labs-section" id="labs">
           <SectionHeading eyebrow="交互仿真 · 参数即时响应" title="让公式变成可观察的变化" description="以下小模型用于建立直觉。它们各自写明近似条件，图形示意不等于真实设备仿真。" />
