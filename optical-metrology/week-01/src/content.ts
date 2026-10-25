@@ -101,4 +101,16 @@ export const quiz = [
     answer: 0,
     explanation: 'ABCD 矩阵是线性一阶模型，适合检查成像关系、光线高度和对焦；彗差等高阶像差需要更完整的波前或光线模型。',
   },
+  {
+    question: 'λ = 550 nm、单缝宽 a = 50 μm、屏距 L = 1.2 m，首暗纹大约在哪里？',
+    options: ['13.2 mm', '1.2 mm', '50 mm'],
+    answer: 0,
+    explanation: '小角度估算 λL/a = 13.200 mm；精确屏幕几何约 13.201 mm。',
+  },
+  {
+    question: '当前孔径演示中的 Airy 半径和离焦圈是什么关系？',
+    options: ['分开计算的衍射与几何量，不是合成后的精确离焦 PSF', '两者相加就是精确的离焦 PSF 半径', 'Airy 半径就是探测器像元尺寸'],
+    answer: 0,
+    explanation: 'Airy 首暗环半径按焦面圆孔衍射公式计算；离焦圈按近轴几何光锥估算。完整离焦 PSF 需要联合波动传播。',
+  },
 ]
