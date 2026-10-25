@@ -4,6 +4,8 @@
 
 ## 光学测量学习
 
+- [光学测量学习主题索引](optical-metrology/README.md)
+- [12 周学习计划原文与路线图](optical-metrology/roadmap/12周光学原理与问题定位学习计划.md)
 - [第 1 周：传感成像光路与像差概念](optical-metrology/week-01/README.md)
 
 后续周次放在 `optical-metrology/week-02/`、`week-03/` 等目录。新增主题时，在仓库根目录创建独立主题文件夹。
