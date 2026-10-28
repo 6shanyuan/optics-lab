@@ -7,6 +7,7 @@ import {
   firstSingleSlitMinimumMm,
   paraxialRayAtSensor,
   singleSlitIntensity,
+  sinc,
   solveThinLens,
   transferMatrix,
 } from './physics'
@@ -70,25 +71,27 @@ function RangeControl({
 }
 
 function SingleSlitLab() {
-  const [slitWidth, setSlitWidth] = useState(50)
+  const [slitWidth, setSlitWidth] = useState(10)
   const [wavelength, setWavelength] = useState(550)
   const [distance, setDistance] = useState(1.2)
+  const [axis, setAxis] = useState<'angle' | 'screen'>('angle')
+  const angularMinimum = wavelength * 1e-3 / slitWidth
   const firstMinimum = firstSingleSlitMinimumMm(slitWidth, wavelength, distance)
   const smallAngle = distance * (wavelength * 1e-9 / (slitWidth * 1e-6)) * 1e3
-  const span = Math.max(12, firstMinimum * 3.1)
+  const span = axis === 'angle' ? Math.min(1, angularMinimum * 3.1) : Math.max(12, firstMinimum * 3.1)
   const chart = { x: 54, y: 20, width: 590, height: 184 }
   const curve = Array.from({ length: 241 }, (_, index) => {
     const xMm = (index / 240 * 2 - 1) * span
-    const intensity = singleSlitIntensity(xMm, slitWidth, wavelength, distance)
+    const intensity = axis === 'angle' ? sinc(Math.PI * slitWidth / (wavelength * 1e-3) * xMm) ** 2 : singleSlitIntensity(xMm, slitWidth, wavelength, distance)
     const x = chart.x + index / 240 * chart.width
     const y = chart.y + (1 - intensity) * chart.height
     return `${index === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`
   }).join(' ')
-  const minimumX = chart.x + (firstMinimum / span) * chart.width
+  const minimumOffset = ((axis === 'angle' ? angularMinimum : firstMinimum) / span) * chart.width / 2
   const marks = [
-    { x: 54, label: `−${span.toFixed(0)}` },
+    { x: 54, label: `−${span.toFixed(axis === 'angle' ? 3 : 0)}` },
     { x: 54 + chart.width / 2, label: '0' },
-    { x: 54 + chart.width, label: span.toFixed(0) },
+    { x: 54 + chart.width, label: span.toFixed(axis === 'angle' ? 3 : 0) },
   ]
 
   return (
@@ -97,13 +100,13 @@ function SingleSlitLab() {
         <div>
           <div className="lab-kicker"><span className="lab-number">01</span><span>波动光学 · 单色单缝</span></div>
           <h3>狭缝越窄，中央主峰越宽</h3>
-          <p>拖动参数，观察屏幕上的归一化强度。这里用 Fraunhofer 单缝公式，并按屏幕坐标反算角度。</p>
+          <p>拖动参数，观察理想单缝的归一化强度。可切换课堂的 sinθ 横轴与屏幕位置横轴。</p>
         </div>
         <span className="model-badge model-physics">解析模型</span>
       </div>
       <div className="lab-grid">
         <div className="controls-stack">
-          <RangeControl label="缝宽 a" value={slitWidth} min={20} max={100} step={1} unit=" µm" onChange={setSlitWidth} />
+          <RangeControl label="缝宽 a" value={slitWidth} min={2} max={100} step={1} unit=" µm" onChange={setSlitWidth} />
           <RangeControl label="波长 λ" value={wavelength} min={400} max={700} step={5} unit=" nm" onChange={setWavelength} />
           <RangeControl label="屏距 L" value={distance} min={0.5} max={2} step={0.1} unit=" m" format={(v) => `${v.toFixed(1)} m`} onChange={setDistance} />
           <div className="formula-note">
@@ -113,7 +116,7 @@ function SingleSlitLab() {
           </div>
         </div>
         <div className="chart-panel">
-          <div className="chart-meta"><span>屏幕位置 x（mm）</span><span>相对强度 I / I₀</span></div>
+          <div className="experiment-presets"><button type="button" aria-pressed={axis === 'angle'} onClick={() => setAxis('angle')}>课堂横轴 sinθ</button><button type="button" aria-pressed={axis === 'screen'} onClick={() => setAxis('screen')}>屏幕横轴 x</button>{[20, 10, 2].map(a => <button type="button" key={a} onClick={() => { setSlitWidth(a); setWavelength(550) }}>{a} μm</button>)}</div><div className="chart-meta"><span>{axis === 'angle' ? 'sinθ（无量纲）' : '屏幕位置 x（mm）'}</span><span>相对强度 I / I₀</span></div>
           <svg className="plot" viewBox="0 0 680 252" role="img" aria-label="单缝衍射归一化强度曲线">
             {[0, 0.25, 0.5, 0.75, 1].map((tick) => {
               const y = chart.y + (1 - tick) * chart.height
@@ -121,12 +124,13 @@ function SingleSlitLab() {
             })}
             <line x1={chart.x} x2={chart.x + chart.width} y1={chart.y + chart.height} y2={chart.y + chart.height} className="plot-axis" />
             {[-1, 1].map((sign) => <g key={sign}>
-              <line x1={chart.x + sign * (minimumX - (chart.x + chart.width / 2))} x2={chart.x + sign * (minimumX - (chart.x + chart.width / 2))} y1={chart.y + 3} y2={chart.y + chart.height} className="minimum-line" />
+              <line x1={chart.x + chart.width / 2 + sign * minimumOffset} x2={chart.x + chart.width / 2 + sign * minimumOffset} y1={chart.y + 3} y2={chart.y + chart.height} className="minimum-line" />
             </g>)}
             <path d={curve} className="curve-line" />
             {marks.map((mark) => <g key={mark.label}><line x1={mark.x} x2={mark.x} y1={chart.y + chart.height} y2={chart.y + chart.height + 4} className="plot-axis" /><text x={mark.x} y={chart.y + chart.height + 20} className="plot-tick" textAnchor="middle">{mark.label}</text></g>)}
-            <text x={chart.x + chart.width / 2} y="245" className="plot-caption" textAnchor="middle">第一暗纹位置约为 ±{firstMinimum.toFixed(2)} mm</text>
+            <text x={chart.x + chart.width / 2} y="245" className="plot-caption" textAnchor="middle">{axis === 'angle' ? `第一暗纹 sinθ = ±${angularMinimum.toFixed(4)}` : `第一暗纹 x = ±${firstMinimum.toFixed(2)} mm`}</text>
           </svg>
+          <div className="angular-result">第一暗纹：sinθ = {angularMinimum.toFixed(4)}；θ = {(Math.asin(angularMinimum) * 180 / Math.PI).toFixed(3)}°</div>
           <div className="result-row">
             <div><span>第一暗纹（精确屏幕坐标）</span><strong>±{firstMinimum.toFixed(3)} mm</strong></div>
             <div><span>小角度估算 λL/a</span><strong>±{smallAngle.toFixed(3)} mm</strong></div>
@@ -139,10 +143,10 @@ function SingleSlitLab() {
 }
 
 function ApertureLab() {
-  const [aperture, setAperture] = useState(10)
+  const [aperture, setAperture] = useState(5)
   const [focalLength, setFocalLength] = useState(50)
   const [wavelength, setWavelength] = useState(550)
-  const [defocus, setDefocus] = useState(1.2)
+  const [defocus, setDefocus] = useState(0)
   const airyRadius = airyFirstMinimumRadiusUm(focalLength, aperture, wavelength)
   const blurDiameter = defocusCircleDiameterUm(focalLength, aperture, defocus)
   const centerY = 130
@@ -165,7 +169,7 @@ function ApertureLab() {
         </div>
         <span className="model-badge model-physics">两个解析近似</span>
       </div>
-      <div className="aperture-visual">
+      <div className="experiment-presets"><button type="button" onClick={() => { setAperture(5); setFocalLength(50); setWavelength(550); setDefocus(0) }}>课堂：D=5 mm，准确对焦</button><button type="button" onClick={() => setDefocus(0.1)}>课堂：Δz=0.1 mm</button></div><div className="aperture-visual">
         <svg viewBox="0 0 680 260" role="img" aria-label="圆孔会聚光束与离焦传感器的几何示意">
           <defs><marker id="ray-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#d6754d" /></marker></defs>
           <line x1="60" x2="615" y1={centerY} y2={centerY} className="optical-axis" />
@@ -213,8 +217,8 @@ function ApertureLab() {
 function AbcdLab() {
   const [focalLength, setFocalLength] = useState(50)
   const [objectDistance, setObjectDistance] = useState(150)
-  const [aperture, setAperture] = useState(16)
-  const [objectHeight, setObjectHeight] = useState(4)
+  const [aperture, setAperture] = useState(8)
+  const [objectHeight, setObjectHeight] = useState(0)
   const [sensorOffset, setSensorOffset] = useState(0)
   const system = solveThinLens(focalLength, objectDistance)
   const imageDistance = system.imageMm
@@ -232,6 +236,7 @@ function AbcdLab() {
     ray: paraxialRayAtSensor(focalLength, objectDistance, objectHeight, lensHeight, sensorOffset),
     color: ['#d6754d', '#4d82a4', '#6d8f65'][index],
   }))
+  const blurDiameter = Math.abs(rays[0].ray.atSensor - rays[2].ray.atSensor) * 1000
   const formatMatrixValue = (value: number) => Math.abs(value) < 1e-9 ? '0' : value.toFixed(4)
 
   return (
@@ -244,7 +249,7 @@ function AbcdLab() {
         </div>
         <span className="model-badge model-diagram">几何示意 + 矩阵计算</span>
       </div>
-      <div className="ab-canvas">
+      <div className="experiment-presets"><button type="button" onClick={() => { setFocalLength(50); setObjectDistance(150); setAperture(8); setObjectHeight(0); setSensorOffset(0) }}>课堂：准确对焦 v=75 mm</button><button type="button" onClick={() => { setFocalLength(50); setObjectDistance(150); setAperture(8); setObjectHeight(0); setSensorOffset(15) }}>课堂：离焦 v=90 mm</button><button type="button" onClick={() => { setFocalLength(50); setObjectDistance(100); setSensorOffset(10) }}>第一课：u=100，v=110 mm</button></div><div className="ab-canvas">
         <svg viewBox="0 0 680 310" role="img" aria-label="物面、薄透镜、光阑和传感器的近轴光线追迹">
           <line x1="32" x2="648" y1={centerY} y2={centerY} className="optical-axis" />
           {rays.map(({ lensHeight, ray, color }, index) => {
@@ -262,7 +267,7 @@ function AbcdLab() {
           <line x1={lensX - 14} x2={lensX + 14} y1={centerY - aperture / 2 * yScale} y2={centerY - aperture / 2 * yScale} className="stop-edge" />
           <line x1={lensX - 14} x2={lensX + 14} y1={centerY + aperture / 2 * yScale} y2={centerY + aperture / 2 * yScale} className="stop-edge" />
           <line x1={sensorX} x2={sensorX} y1="34" y2="278" className="sensor-plane" />
-          <circle cx={sensorX} cy={centerY - system.magnification * objectHeight * yScale} r="4" className="focus-point" />
+          <circle cx={sensorX} cy={centerY - rays[1].ray.atSensor * yScale} r="4" className="focus-point" />
           <text x={objectX} y="34" className="svg-label" textAnchor="middle">物面</text>
           <text x={lensX} y="34" className="svg-label" textAnchor="middle">薄透镜 + 光阑</text>
           <text x={sensorX} y="34" className="svg-label" textAnchor="middle">像面 {sensorOffset === 0 ? '' : `${sensorOffset > 0 ? '+' : ''}${sensorOffset.toFixed(0)} mm`}</text>
@@ -275,13 +280,14 @@ function AbcdLab() {
           <RangeControl label="焦距 f" value={focalLength} min={30} max={80} step={1} unit=" mm" onChange={setFocalLength} />
           <RangeControl label="物距 u" value={objectDistance} min={90} max={300} step={1} unit=" mm" onChange={setObjectDistance} />
           <RangeControl label="光阑直径 D" value={aperture} min={6} max={24} step={1} unit=" mm" onChange={setAperture} />
-          <RangeControl label="物高 y" value={objectHeight} min={1} max={6} step={0.5} unit=" mm" format={(v) => `${v.toFixed(1)} mm`} onChange={setObjectHeight} />
+          <RangeControl label="物高 y" value={objectHeight} min={0} max={6} step={0.5} unit=" mm" format={(v) => `${v.toFixed(1)} mm`} onChange={setObjectHeight} />
           <RangeControl label="传感器偏离像面" value={sensorOffset} min={-20} max={20} step={1} unit=" mm" format={(v) => `${v > 0 ? '+' : ''}${v} mm`} onChange={setSensorOffset} />
         </div>
         <div className="matrix-panel">
           <div className="matrix-heading"><span>系统矩阵</span><small>T(v) · L(f) · T(u)</small></div>
           <div className="matrix-equation"><span className="matrix-bracket">[</span><div className="matrix-values"><span>{formatMatrixValue(a)}</span><span className={Math.abs(b) < 1e-8 ? 'zero-value' : ''}>{formatMatrixValue(b)} mm</span><span>{formatMatrixValue(c)} / mm</span><span>{formatMatrixValue(d)}</span></div><span className="matrix-bracket">]</span><span className="matrix-vector">[ y<br /> θ ]</span><span className="matrix-equals">= [ y′<br /> θ′ ]</span></div>
           <div className="result-row abcd-results">
+            <div><span>探测器实际距离</span><strong>{sensorDistance.toFixed(2)} mm</strong></div><div><span>几何光斑直径</span><strong>{blurDiameter.toFixed(1)} µm</strong></div>
             <div><span>薄透镜像距 v</span><strong>{imageDistance.toFixed(2)} mm</strong></div>
             <div><span>横向放大率 m = −v/u</span><strong>{system.magnification.toFixed(3)}</strong></div>
           </div>
@@ -391,7 +397,7 @@ function App() {
             <h1>把一个光点，<br /><em>看成一条测量链。</em></h1>
             <p className="hero-lede">从目标、光路到探测器，拆开理想像为什么会变成真实的斑。用参数可调的演示建立直觉，再用公式和对照检查结论。</p>
             <div className="hero-actions"><a className="button-primary" href="#lesson">开始课程学习 <span>↓</span></a><a className="button-quiet" href="#labs">再做参数仿真 <span>↗</span></a></div>
-            <div className="hero-meta"><span><b>12 小时</b> 本周必做时间</span><span><b>08 节</b> 课程正文</span><span><b>01 / 12</b> 学习进度</span></div>
+            <div className="hero-meta"><span><b>12 小时</b> 本周必做时间</span><span><b>10 章</b> 课程正文</span><span><b>01 / 12</b> 学习进度</span></div>
           </div>
           <div className="hero-art" aria-label="光束通过光阑并在传感器面形成光斑的示意">
             <div className="art-topline"><span>OPTICAL PATH / 01</span><span>SCHEMATIC</span></div>
@@ -466,9 +472,9 @@ function App() {
           <SectionHeading eyebrow="学习档案 · 可持续补充" title="把本周的判断依据留下来" description="保存公式、变量单位和证据边界，让后续复盘能还原当时的条件。" />
           <div className="notes-grid">
             <article className="notes-card main-notes"><div className="notes-card-head"><span className="card-symbol">01</span><span className="notes-type">学习笔记 · 第 1 周</span><span className="notes-date">基础版</span></div><h3>理想点为什么会变成斑？</h3><p>成像系统把物点映射到像面，但有限孔径带来衍射。离焦会让几何光线不在像面相交；高阶像差则是波前或成像偏离选定理想参考模型。探测器噪声、欠采样和算法处理也会改变观测结果，它们不应统称为像差。</p><div className="note-equations"><div><span>薄透镜成像</span><code>1/f = 1/u + 1/v</code><small>u、v、f 使用同一长度单位；这里按实物距、实像距取正值。</small></div><div><span>横向放大率</span><code>m = y′/y = −v/u</code><small>负号表示实像相对物体倒置。</small></div><div><span>单缝第一暗纹</span><code>a sin θ = λ　⇒　x₁ ≈ λL/a</code><small>最后一步使用小角度近似；数值曲线用精确屏幕几何。</small></div></div><div className="notes-conclusion"><span>本周结论</span><b>近轴模型检查一阶几何关系；它不能预测彗差等高阶像差。</b></div></article>
-            <article className="notes-card notebook-card"><div className="notes-card-head"><span className="card-symbol notebook-symbol">⌘</span><span className="notes-type">Jupyter Notebook</span><span className="notes-date">可运行</span></div><h3>从公式到数值检查</h3><p>Notebook 包含单缝曲线、薄透镜 ABCD 矩阵、孔径衍射尺度与离焦弥散圈公式，可在本地复算本页默认参数。</p><div className="notebook-preview"><span>week1_abcd_optics.ipynb</span><code>λ = 550 nm　a = 50 μm　L = 1.2 m<br />v = 75 mm　m = −0.5<br />Airy radius ≈ 3.36 μm</code></div><a className="download-link" href={`${import.meta.env.BASE_URL}notebooks/week1_abcd_optics.ipynb`} download>下载 Notebook <span>↓</span></a><small className="download-help">需要 Python、NumPy、Matplotlib 和 Jupyter。</small></article>
+            <article className="notes-card notebook-card"><div className="notes-card-head"><span className="card-symbol notebook-symbol">⌘</span><span className="notes-type">Jupyter Notebook</span><span className="notes-date">可运行</span></div><h3>从公式到数值检查</h3><p>Notebook 包含单缝曲线、薄透镜 ABCD 矩阵、孔径衍射尺度与离焦弥散圈公式，可在本地复算本页公式与课堂示例。</p><div className="notebook-preview"><span>week1_abcd_optics.ipynb</span><code>λ = 550 nm　a = 50 μm　L = 1.2 m<br />v = 75 mm　m = −0.5<br />Airy radius ≈ 3.36 μm</code></div><a className="download-link" href={`${import.meta.env.BASE_URL}notebooks/week1_abcd_optics.ipynb`} download>下载 Notebook <span>↓</span></a><small className="download-help">需要 Python、NumPy、Matplotlib 和 Jupyter。</small></article>
           </div>
-          <div className="glossary-block"><div className="glossary-heading"><div><p className="eyebrow">术语表 · 中英对照</p><h3>先统一变量和概念</h3></div><span>15 TERMS</span></div><div className="glossary-list">{glossary.map((term) => <details className="glossary-item" key={term.en}><summary><span className="term-en">{term.en}</span><b>{term.zh}</b><span className="expand-mark">+</span></summary><p>{term.desc}</p></details>)}</div></div>
+          <div className="glossary-block"><div className="glossary-heading"><div><p className="eyebrow">术语表 · 中英对照</p><h3>先统一变量和概念</h3></div><span>{glossary.length} TERMS</span></div><div className="glossary-list">{glossary.map((term) => <details className="glossary-item" key={term.en}><summary><span className="term-en">{term.en}</span><b>{term.zh}</b><span className="expand-mark">+</span></summary><p>{term.desc}</p></details>)}</div></div>
           <div className="reflection-card"><div className="reflection-index">REFLECTION<br />01 / 01</div><div><p className="eyebrow">反思题</p><h3>目标上下移动时，图像中心也发生移动。下一步检查什么？</h3><p>先检查远心性、主光线角度或光轴倾斜等几何因素，再看焦点变化和点像形状。仅凭位置变化不能直接判定彗差。</p></div><span className="reflection-mark">?</span></div>
         </section>
 
@@ -482,7 +488,7 @@ function App() {
             <li><a href="https://vite.dev/guide/static-deploy" target="_blank" rel="noreferrer">Vite · GitHub Pages 静态部署说明 <span>↗</span></a></li>
             <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages" target="_blank" rel="noreferrer">GitHub Docs · 使用 Actions 发布 Pages <span>↗</span></a></li>
           </ul>
-          <p className="verification-note">默认参数复核：f = 50 mm、u = 150 mm → v = 75 mm、m = −0.5；λ = 550 nm、a = 50 μm、L = 1.2 m → 第一暗纹精确几何值约 13.201 mm；λ = 550 nm、f = 50 mm、D = 10 mm → Airy 首暗环半径约 3.355 μm。</p>
+          <p className="verification-note">参考例题复核：f = 50 mm、u = 150 mm → v = 75 mm、m = −0.5；λ = 550 nm、a = 50 μm、L = 1.2 m → 第一暗纹精确几何值约 13.201 mm；λ = 550 nm、f = 50 mm、D = 10 mm → Airy 首暗环半径约 3.355 μm。</p>
         </section>
       </main>
 

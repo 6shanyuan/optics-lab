@@ -10,6 +10,8 @@
 
 后续周次放在 `optical-metrology/week-02/`、`week-03/` 等目录。新增主题时，在仓库根目录创建独立主题文件夹。
 
+第 1 周课程已按教学逐字稿重建：保留原稿，提供 10 章课程正文、逐字稿行号对应、14 道判题练习与可复算 Notebook。
+
 ## GitHub Pages
 
 GitHub Actions 会从 `optical-metrology/week-01/` 构建当前交互式学习网站，并将网站发布到仓库 Pages 根地址。推送到 `main` 后自动部署，也可以在 **Actions** 中手动运行部署工作流。首次发布前，在 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 260" role="img" aria-labelledby="title desc"><title id="title">狭缝与次级波的概念图</title><desc id="desc">左侧平面波遇到狭缝，右侧多个次级波前叠加。示意波前没有数值计算振幅或边界条件。</desc><rect width="780" height="260" fill="#f2f0e8"/>
+<g stroke="#718a7b" stroke-width="2"><path d="M80 35V200 M120 35V200 M160 35V200 M200 35V200 M240 35V200"/></g>
+<path d="M310 20V94 M310 142V220" stroke="#253c37" stroke-width="12"/>
+<g fill="none" stroke="#c9754d" opacity=".55"><path d="M310 94A25 25 0 0 1 310 144 M310 69A50 50 0 0 1 310 169 M310 44A75 75 0 0 1 310 194 M310 19A100 100 0 0 1 310 219"/><path d="M310 82A25 25 0 0 1 310 132 M310 57A50 50 0 0 1 310 157 M310 32A75 75 0 0 1 310 182"/><path d="M310 106A25 25 0 0 1 310 156 M310 81A50 50 0 0 1 310 181 M310 56A75 75 0 0 1 310 206"/></g>
+<g font-family="sans-serif" fill="#243735"><text x="92" y="242" font-size="15">入射平面波</text><text x="278" y="242" font-size="15">有限狭缝</text><text x="470" y="85" font-size="17">各处贡献带有振幅和相位</text><text x="470" y="121" font-size="17">先叠加波场，再计算强度</text><text x="470" y="165" font-size="13" fill="#666">概念示意，不是传播方程的数值解</text></g></svg>

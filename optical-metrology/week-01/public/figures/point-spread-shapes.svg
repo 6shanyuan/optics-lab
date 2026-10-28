@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 260" role="img" aria-labelledby="title desc">
+<title id="title">三种光斑形状的教学示意</title><desc id="desc">圆对称亮斑、离焦圆斑与非对称拖尾，仅表达形状直觉，没有计算强度或真实PSF。</desc>
+<defs><radialGradient id="spot"><stop stop-color="#f6d7a3"/><stop offset=".35" stop-color="#cc784b"/><stop offset="1" stop-color="#cc784b" stop-opacity="0"/></radialGradient><linearGradient id="tail"><stop stop-color="#d38652"/><stop offset="1" stop-color="#d38652" stop-opacity="0"/></linearGradient></defs>
+<rect width="780" height="260" rx="6" fill="#f2f0e8"/>
+<g fill="#243735"><rect x="20" y="20" width="235" height="165" rx="4"/><rect x="272" y="20" width="235" height="165" rx="4"/><rect x="524" y="20" width="235" height="165" rx="4"/></g>
+<circle cx="138" cy="102" r="27" fill="url(#spot)"/><g fill="none" stroke="#d59861"><circle cx="138" cy="102" r="35" opacity=".6"/><circle cx="138" cy="102" r="45" opacity=".3"/><circle cx="138" cy="102" r="56" opacity=".15"/></g>
+<circle cx="390" cy="102" r="49" fill="#d6935d" opacity=".6"/><circle cx="390" cy="102" r="45" fill="#e7b27e" opacity=".3"/>
+<path d="M600 83 Q655 85 725 111 Q652 134 600 121Z" fill="url(#tail)"/><ellipse cx="607" cy="102" rx="26" ry="22" fill="url(#spot)"/>
+<g text-anchor="middle" font-family="sans-serif" font-size="16" fill="#243735"><text x="138" y="211">理想圆瞳衍射斑的形状直觉</text><text x="390" y="211">几何离焦圆斑示意</text><text x="642" y="211">非对称拖尾示意</text></g>
+<text x="390" y="243" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#666">绘图为教学示意，非定量 PSF；拖尾不能单独证明彗差</text>
+</svg>
